@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacking & Cyber</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            color: green;
+        }
+        .button {
+            background-color: black;
+            color: white;
+            border: 1px solid white;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .button.red {
+            color: red;
+        }
+        .hidden {
+            display: none;
+        }
+        .message {
+            color: red;
+        }
+    </style>
+    <script>
+        function startHacking(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch('/start_hacking', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('prompt').innerText = data.prompt;
+                document.getElementById('encrypted_password').innerText = "Encrypted password: " + data.encrypted_password;
+                document.getElementById('correct_password').value = data.correct_password;
+                document.getElementById('ship_name_result').value = formData.get('ship_name');
+                document.getElementById('start-form').classList.add('hidden');
+                document.getElementById('hack-form').classList.remove('hidden');
+
+                // Debug: Print correct password to console
+                console.log("Correct password:", data.correct_password);
+            });
+        }
+
+        function hack(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch('/hack', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageElem = document.getElementById('result-message');
+                messageElem.innerText = data.message;
+                messageElem.style.color = data.color;
+                document.getElementById('hack-form').classList.add('hidden');
+                document.getElementById('result').classList.remove('hidden');
+
+                // Debug: Print response message to console
+                console.log("Response message:", data.message);
+            });
+        }
+
+        function startOver() {
+            document.getElementById('start-form').classList.remove('hidden');
+            document.getElementById('hack-form').classList.add('hidden');
+            document.getElementById('result').classList.add('hidden');
+        }
+    </script>
+</head>
+<body>
+    <h1>Hacking & Cyber</h1>
+
+    <form id="start-form" onsubmit="startHacking(event)">
+        <label for="ship_name">Enter ship's name:</label><br>
+        <input type="text" id="ship_name" name="ship_name" required><br><br>
+
+        <label>Pick difficulty level:</label><br>
+        <input type="radio" id="difficulty1" name="difficulty" value="1" required>
+        <label for="difficulty1">1</label>
+        <input type="radio" id="difficulty2" name="difficulty" value="2">
+        <label for="difficulty2">2</label>
+        <input type="radio" id="difficulty3" name="difficulty" value="3">
+        <label for="difficulty3">3</label><br><br>
+
+        <label>Pick complicity level:</label><br>
+        <input type="radio" id="easy" name="complicity" value="Easy" required>
+        <label for="easy">Easy</label>
+        <input type="radio" id="advanced" name="complicity" value="Advanced">
+        <label for="advanced">Advanced</label>
+        <input type="radio" id="hard" name="complicity" value="Hard">
+        <label for="hard">Hard</label><br><br>
+
+        <button type="submit" class="button">Start Hacking</button>
+    </form>
+
+    <form id="hack-form" class="hidden" onsubmit="hack(event)">
+        <p id="prompt"></p>
+        <p id="encrypted_password"></p>
+
+        <input type="hidden" id="correct_password" name="correct_password">
+        <input type="hidden" id="ship_name_result" name="ship_name">
+        <label for="user_password">Enter the password:</label><br>
+        <input type="text" id="user_password" name="user_password" required><br><br>
+        <button type="submit" class="button">Hack!</button>
+    </form>
+
+    <div id="result" class="hidden">
+        <p id="result-message" class="message"></p>
+        <button class="button red" onclick="startOver()">Start Over</button>
+    </div>
+</body>
+</html>
